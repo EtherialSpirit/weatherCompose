@@ -3,15 +3,34 @@ package com.example.weathercompose
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.example.weathercompose.api.WeatherApi
 import com.example.weathercompose.ui.theme.WeatherComposeTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
+const val API_KEY = "XfUllI8hjzyHiwye7mMdlg==OQjEfSMmr8VMiAz7"
+const val BASE_URL_WEATHER = "https://api.api-ninjas.com/v1"
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,6 +42,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Greeting("Android")
+
                 }
             }
         }
@@ -30,10 +50,46 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun Greeting(name: String,) {
+
+    val state = remember {
+        mutableStateOf("Unknown")
+    }
+    Column ( modifier = Modifier
+        .fillMaxSize()){
+        Box(modifier = Modifier
+            .fillMaxHeight(0.5f)
+            .fillMaxWidth(),
+            contentAlignment = Alignment.Center){
+            Text(text = "Temp in $name = ${state.value}")
+        }
+        Box(modifier = Modifier
+            .fillMaxHeight()
+            .fillMaxWidth(),
+            contentAlignment = Alignment.BottomCenter){
+            Button(onClick = {
+                //getResult()
+            }, modifier = Modifier
+                .padding(5.dp)
+                .fillMaxWidth()
+            ) {
+                Text(text = "Refresh")
+            }
+        }
+
+    }
+
 }
+
+private fun getResult(city:String, state: MutableState<String>){
+    val retrofit = Retrofit.Builder()
+        .baseUrl(BASE_URL_WEATHER)
+        .addConverterFactory(GsonConverterFactory.create()).build()
+    val weatherApi = retrofit.create(WeatherApi::class.java)
+    CoroutineScope(Dispatchers.IO).launch {
+        val weather = weatherApi.getWeatherCity()
+
+        }
+    }
+
 
