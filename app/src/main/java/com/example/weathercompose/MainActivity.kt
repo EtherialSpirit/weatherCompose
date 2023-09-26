@@ -26,6 +26,7 @@ import com.example.weathercompose.ui.theme.WeatherComposeTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -81,14 +82,16 @@ fun Greeting(name: String,) {
 
 }
 
-private fun getResult(city:String, state: MutableState<String>){
+ fun getResult(city:String, state: MutableState<String>){
     val retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL_WEATHER)
         .addConverterFactory(GsonConverterFactory.create()).build()
     val weatherApi = retrofit.create(WeatherApi::class.java)
     CoroutineScope(Dispatchers.IO).launch {
         val weather = weatherApi.getWeatherCity()
+            withContext(Dispatchers.Main){
 
+            }
         }
     }
 
