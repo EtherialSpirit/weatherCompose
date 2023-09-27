@@ -1,5 +1,6 @@
 package com.example.weathercompose
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -27,11 +28,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-const val API_KEY = "XfUllI8hjzyHiwye7mMdlg==OQjEfSMmr8VMiAz7"
-const val BASE_URL_WEATHER = "https://api.api-ninjas.com/v1"
+private const val API_KEY = "1febfd481cb0d27c7d7ea9b49148e7e7"
+private const val BASE_URL_WEATHER = "https://api.openweathermap.org/data/2.5/"
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +45,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+
                     Greeting("Android")
 
                 }
@@ -85,14 +89,34 @@ fun Greeting(name: String,) {
  fun getResult(city:String, state: MutableState<String>){
     val retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL_WEATHER)
+        .client(createClient())
         .addConverterFactory(GsonConverterFactory.create()).build()
     val weatherApi = retrofit.create(WeatherApi::class.java)
-    CoroutineScope(Dispatchers.IO).launch {
-        val weather = weatherApi.getWeatherCity()
-            withContext(Dispatchers.Main){
 
-            }
-        }
+
     }
+
+fun createClient(): OkHttpClient =
+    OkHttpClient.Builder()
+        .addInterceptor { chain ->
+            val url = chain
+                .request()
+                .url
+                .newBuilder()
+                .addQueryParameter("appid", API_KEY)
+                .build()
+            val request = chain
+                .request()
+                .newBuilder()
+                .url(url)
+                .build()
+            chain.proceed(request)
+        }
+        .addInterceptor(HttpLoggingInterceptor().apply{
+            level = if(BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+        })
+        .build()
+
+
 
 
